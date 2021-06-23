@@ -2,20 +2,24 @@ const express = require("express");
 const app = express();
 
 const { items } = require("./folderItems");
-const { derivativeGuid } = require("./derivative");
+const { allItems } = require("./allItems");
+
 const { guid } = require("./tester");
+
 const { metadata } = require("./tester");
+const { derivativeGuid } = require("./derivative");
 
 //******************************************** */
 const { folderDetails } = require("./folderDetails");
 const { itemsDetail } = require("./itemsDetail");
 
-app.get("/items", async function (req, res) {
-  const items = await itemsDetail();
+app.get("/allItems", async function (req, res) {
+  const items = await allItems();
   res.send(items);
 });
 app.get("/folderItems", async function (req, res) {
   const item = await items();
+
   res.send(item);
 });
 app.get("/folders", async function (req, res) {

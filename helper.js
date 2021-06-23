@@ -13,45 +13,90 @@ function flatten(arr) {
 }
 
 //Item filter and extract the needed data
-function getFolderItemHelper(folder, folderItems) {
+function getItemVersionHelper(folder, folderItems) {
   const includeds = folder
-    .filter((item) => item.included)
-    .map((attribute) => {
-      return attribute.included.map((derivative) => {
-        return { derivative, folderDetail: attribute.folderDetail };
-      });
-    });
-  const flatenItem = flatten(includeds);
-  const checkItemDetails = flatenItem.filter((item) => {
-    if (item.derivative.attributes.fileType === "rvt") {
-      if (
-        item.derivative.relationships.derivatives.data.type === "derivatives"
-      ) {
+    .filter((item) => {
+      if (item.included) {
         return true;
+      } else {
+        return false;
       }
-    } else {
-      false;
-    }
+    })
+    .map((attribute) => {
+      const item = attribute.data.filter((item) => item.type === "items");
+
+      return {
+        item,
+        included: attribute.included,
+        folderDetail: attribute.folderDetail,
+      };
+    });
+
+  const Items = includeds.map((itemInfo) => {
+    return itemInfo.item.map((item) => {
+      return {
+        itemId: item.id,
+        itemType: item.type,
+        displayName: item.attributes.displayName,
+        createTime: item.attributes.createTime,
+        createUserName: item.attributes.createUserName,
+        lastModifiedTime: item.attributes.lastModifiedTime,
+        lastModifiedUserName: item.attributes.lastModifiedUserName,
+        ...itemInfo.folderDetail,
+      };
+    });
   });
-  const itemDetails = checkItemDetails.map((itemDetail) => {
-    return {
-      itemId: itemDetail.derivative.id,
-      type: itemDetail.derivative.type,
-      derivativesId: itemDetail.derivative.relationships.derivatives.data.id,
-      createUserName: itemDetail.derivative.attributes.createUserName,
-      fileType: itemDetail.derivative.attributes.fileType,
-      createTime: itemDetail.derivative.attributes.createTime,
-      lastModifiedTime: itemDetail.derivative.attributes.lastModifiedTime,
-      lastModifiedUserName:
-        itemDetail.derivative.attributes.lastModifiedUserName,
-      storageSize: itemDetail.derivative.attributes.storageSize,
-      fileName: itemDetail.derivative.attributes.displayName,
-      ...itemDetail.folderDetail,
-    };
+  // const flatenItem = flatten(Items);
+  const itemVersions = folder
+    .map((itemVersion) => {
+      return { itemVersion, folderDetail: itemVersion.folderDetail };
+    })
+    .filter((item) => item.itemVersion.included);
+
+  const includes = itemVersions.map((item) => {
+    const allIncludes = item.itemVersion.included.filter((item) => {
+      if (
+        item.attributes.fileType === "rvt" &&
+        item.relationships.derivatives.data.type === "derivatives"
+      ) {
+        {
+          return true;
+        }
+      } else {
+        false;
+      }
+    });
+    return { allIncludes, folderDetail: item.folderDetail };
   });
 
-  return itemDetails;
+  const allInclouded = includes.map((itemIncloude) => {
+    const itemVersion = itemIncloude.allIncludes.map((incloude) => {
+      return {
+        itemVersion: incloude.id,
+        type: incloude.type,
+        derivativesId: incloude.relationships.derivatives.data.id,
+        createUserName: incloude.attributes.createUserName,
+        fileType: incloude.attributes.fileType,
+        createTime: incloude.attributes.createTime,
+        lastModifiedTime: incloude.attributes.lastModifiedTime,
+        lastModifiedUserName: incloude.attributes.lastModifiedUserName,
+        storageSize: incloude.attributes.storageSize,
+        fileName: incloude.attributes.displayName,
+        extension: incloude.attributes.extension.type,
+        ...itemIncloude.folderDetail,
+      };
+    });
+    return itemVersion;
+  });
+  const flatenallInclouded = flatten(allInclouded);
+  const flatenallItems = flatten(Items);
+  return { flatenallInclouded, flatenallItems };
 }
+
+/**
+ * 
+
+ */
 // Get all foders details in order to fetch the items
 function folderInfoHelper(folder, folderItems) {
   const foldersAttributes = folder
@@ -61,15 +106,10 @@ function folderInfoHelper(folder, folderItems) {
         return { folderInfo, folderDetail: folder.folderDetail };
       });
     });
-  const flattenFolder = flatten(foldersAttributes);
-  const folderInformationss = flattenFolder.filter((folder) => {
-    if (folder.folderInfo.type === "folders") {
-      return true;
-    } else {
-      return false;
-    }
-  });
-  const foldersIds = folderInformationss.map((folder) => {
+
+  const folderInformations = contentType("folders", foldersAttributes);
+
+  const foldersDetaile = folderInformations.map((folder) => {
     return {
       folderId: folder.folderInfo.id,
       type: folder.folderInfo.type,
@@ -83,7 +123,44 @@ function folderInfoHelper(folder, folderItems) {
     };
   });
 
-  return foldersIds;
+  const itemsInformations = contentType("items", foldersAttributes);
+
+  const itemDetaile = itemsInformations.map((item) => {
+    return {
+      type: item.folderInfo.type,
+      itemId: item.folderInfo.id,
+      displayName: item.folderInfo.attributes.displayName,
+      createTime: item.folderInfo.attributes.createTime,
+      createUserName: item.folderInfo.attributes.createUserName,
+      lastModifiedTime: item.folderInfo.attributes.lastModifiedTime,
+      lastModifiedUserName: item.folderInfo.attributes.lastModifiedUserName,
+      hidden: item.folderInfo.attributes.hidden,
+      C4RModelType: item.folderInfo.attributes.extension.type,
+
+      ...item.folderDetail,
+    };
+  });
+
+  // return itemDetaile;
+  return { foldersDetaile, itemDetaile };
 }
 
-module.exports = { flatten, getFolderItemHelper, folderInfoHelper };
+function contentType(type, attributes) {
+  const flattenFolder = flatten(attributes);
+  const folderInformationss = flattenFolder.filter((folder) => {
+    if (folder.folderInfo.type === type) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
+  return folderInformationss;
+}
+
+module.exports = {
+  flatten,
+  getItemVersionHelper,
+  folderInfoHelper,
+  contentType,
+};
