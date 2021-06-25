@@ -1,7 +1,7 @@
 const { oAuth2TwoLegged } = require("./oAuth2TwoLegged");
 const { FetchFunction } = require("./fetchFunction");
 const { folderDetails } = require("./folderDetails");
-const { getItemVersionHelper } = require("./helper");
+const { getItemVersionHelper, delay } = require("./helper");
 
 require("dotenv").config({ path: "./.env" });
 
@@ -24,6 +24,8 @@ async function items() {
       projectId: iItem.projectId,
       projectName: iItem.projectName,
     };
+
+    console.log("Fetching Folder", iItem.name);
     array.push({ ...itemContent, folderDetail });
   }
 

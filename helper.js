@@ -12,68 +12,29 @@ function flatten(arr) {
   return flatArray;
 }
 
-//Item filter and extract the needed data
+//Get Item from any folder.
 function getItemVersionHelper(folder, folderItems) {
-  const includeds = folder
-    .filter((item) => {
-      if (item.included) {
-        return true;
-      } else {
-        return false;
-      }
-    })
-    .map((attribute) => {
-      const item = attribute.data.filter((item) => item.type === "items");
+  const test = folder.filter((item) => item.included);
 
-      return {
-        item,
-        included: attribute.included,
-        folderDetail: attribute.folderDetail,
-      };
-    });
-
-  const Items = includeds.map((itemInfo) => {
-    return itemInfo.item.map((item) => {
-      return {
-        itemId: item.id,
-        itemType: item.type,
-        displayName: item.attributes.displayName,
-        createTime: item.attributes.createTime,
-        createUserName: item.attributes.createUserName,
-        lastModifiedTime: item.attributes.lastModifiedTime,
-        lastModifiedUserName: item.attributes.lastModifiedUserName,
-        ...itemInfo.folderDetail,
-      };
-    });
-  });
-  // const flatenItem = flatten(Items);
-  const itemVersions = folder
-    .map((itemVersion) => {
-      return { itemVersion, folderDetail: itemVersion.folderDetail };
-    })
-    .filter((item) => item.itemVersion.included);
-
-  const includes = itemVersions.map((item) => {
-    const allIncludes = item.itemVersion.included.filter((item) => {
-      if (
-        item.attributes.fileType === "rvt" &&
-        item.relationships.derivatives.data.type === "derivatives"
-      ) {
-        {
+  const revitFilesIncluded = test
+    .map((item) => {
+      const allIncluded = item.included.filter((item) => {
+        if (item.attributes.fileType === "rvt") {
           return true;
+        } else {
+          return false;
         }
-      } else {
-        false;
-      }
-    });
-    return { allIncludes, folderDetail: item.folderDetail };
-  });
+      });
 
-  const allInclouded = includes.map((itemIncloude) => {
-    const itemVersion = itemIncloude.allIncludes.map((incloude) => {
+      return { allIncluded, folderDetail: item.folderDetail };
+    })
+    .filter((item) => item.allIncluded.length != 0);
+
+  const itemAndVersionIfo = revitFilesIncluded.map((allItems) => {
+    const allIncludes = allItems.allIncluded.map((incloude) => {
       return {
-        itemVersion: incloude.id,
-        type: incloude.type,
+        versionId: incloude.id,
+        versionType: incloude.type,
         derivativesId: incloude.relationships.derivatives.data.id,
         createUserName: incloude.attributes.createUserName,
         fileType: incloude.attributes.fileType,
@@ -83,21 +44,19 @@ function getItemVersionHelper(folder, folderItems) {
         storageSize: incloude.attributes.storageSize,
         fileName: incloude.attributes.displayName,
         extension: incloude.attributes.extension.type,
-        ...itemIncloude.folderDetail,
+        originalItemUrn: incloude.attributes.extension.data.originalItemUrn,
+        projectGuid: incloude.attributes.extension.data.projectGuid,
+        ...allItems.folderDetail,
       };
     });
-    return itemVersion;
+    return allIncludes;
   });
-  const flatenallInclouded = flatten(allInclouded);
-  const flatenallItems = flatten(Items);
-  return { flatenallInclouded, flatenallItems };
+
+  const flatItemAndVersionIfo = flatten(itemAndVersionIfo);
+  return flatItemAndVersionIfo;
 }
 
-/**
- * 
-
- */
-// Get all foders details in order to fetch the items
+// Get all foders details in order to fetch their items
 function folderInfoHelper(folder, folderItems) {
   const foldersAttributes = folder
     .filter((item) => item.data)
@@ -122,26 +81,9 @@ function folderInfoHelper(folder, folderItems) {
       ...folder.folderDetail,
     };
   });
+  // Get item from inside Folder Files
+  const itemDetaile = getItemVersionHelper(folder);
 
-  const itemsInformations = contentType("items", foldersAttributes);
-
-  const itemDetaile = itemsInformations.map((item) => {
-    return {
-      type: item.folderInfo.type,
-      itemId: item.folderInfo.id,
-      displayName: item.folderInfo.attributes.displayName,
-      createTime: item.folderInfo.attributes.createTime,
-      createUserName: item.folderInfo.attributes.createUserName,
-      lastModifiedTime: item.folderInfo.attributes.lastModifiedTime,
-      lastModifiedUserName: item.folderInfo.attributes.lastModifiedUserName,
-      hidden: item.folderInfo.attributes.hidden,
-      C4RModelType: item.folderInfo.attributes.extension.type,
-
-      ...item.folderDetail,
-    };
-  });
-
-  // return itemDetaile;
   return { foldersDetaile, itemDetaile };
 }
 
@@ -158,9 +100,18 @@ function contentType(type, attributes) {
   return folderInformationss;
 }
 
+async function delay(ms) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve();
+    }, ms);
+  });
+}
+
 module.exports = {
   flatten,
   getItemVersionHelper,
   folderInfoHelper,
   contentType,
+  delay,
 };

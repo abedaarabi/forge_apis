@@ -57,18 +57,22 @@ async function folders() {
   try {
     const credentials = await oAuth2TwoLegged();
     const folderDetails = await topFolders();
+    let folder = [];
+    for (let i = 0; i < folderDetails.length; i++) {
+      const folderDetail = folderDetails[i];
+      console.log(
+        "Feting Project Files Folder for :",
+        folderDetail.projectName
+      );
 
-    const folders = await Promise.all(
-      folderDetails.map(async (folderDetail) => {
-        const folderContents = await FetchFunction(
-          `${process.env.API_ENDPOINT}data/v1/projects/${folderDetail.projectId}/folders/${folderDetail.urnFolder}/contents`,
-          credentials.access_token
-        );
+      const folderContents = await FetchFunction(
+        `${process.env.API_ENDPOINT}data/v1/projects/${folderDetail.projectId}/folders/${folderDetail.urnFolder}/contents`,
+        credentials.access_token
+      );
+      folder.push({ ...folderContents, folderDetail });
+    }
 
-        return { ...folderContents, folderDetail };
-      })
-    );
-    return folders;
+    return folder;
   } catch (error) {
     console.log(error.message);
   }

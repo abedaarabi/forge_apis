@@ -5,8 +5,8 @@ const { flatten, delay } = require("./helper");
 const { itemsDetail } = require("./itemsDetail");
 require("dotenv").config({ path: "./.env" });
 
-async function derivativeGuid() {
-  let guidSene = [];
+async function translationProgress() {
+  let allItemsProgress = [];
   let allitems = [];
   const credentials = await oAuth2TwoLegged();
   const folderItem = await items();
@@ -22,32 +22,23 @@ async function derivativeGuid() {
       credentials.access_token
     );
     console.log("Translation Status:", manifest.derivatives);
-    const guidContents = await FetchFunction(
-      `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/metadata`,
-      credentials.access_token
-    );
-
-    const roles3d = guidContents.data.metadata.filter((item) => {
-      if (item.role === "3d" && item.name === "New Construction") {
-        return true;
-      }
-    });
-    console.log("Feting view name and guid", derivative.fileName);
-    guidSene.push({ roles3d, derivative });
+    allItemsProgress.push(manifest);
   }
+  const flatAllItemsProgress = flatten(allItemsProgress);
 
-  const guids = guidSene.map((item) => {
-    return item.roles3d.map((guid) => {
-      return {
-        vieweName: guid.name,
-        role: guid.role,
-        guid: guid.guid,
-        ...item.derivative,
-      };
-    });
+  const allItemTranslatePros = flatAllItemsProgress.map((item) => {
+    return { progress: item.progress, status: item.status };
   });
-  const flatguidSene = flatten(guids);
-  return flatguidSene;
+
+  const check = allItemTranslatePros.every((item) => {
+    if (item.progress == "complete" && item.status == "success") {
+      return true;
+    } else {
+      return false;
+    }
+  });
+
+  return check;
 }
 
-module.exports = { derivativeGuid };
+module.exports = { translationProgress };
