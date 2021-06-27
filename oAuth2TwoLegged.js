@@ -1,12 +1,16 @@
 const ForgeSDK = require("forge-apis");
+require("dotenv").config({ path: "./.env" });
 
 function oAuth2TwoLegged() {
   return new ForgeSDK.AuthClientTwoLegged(
-    "7KQ4vqb7uJFWgWYgNRnhE6T5ZDnbxPcn",
-    "GMgjs3ljOpfRLuMW",
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET,
     ["data:read", "data:write", "data:create"],
     true
   ).authenticate();
 }
 
 module.exports = { oAuth2TwoLegged };
+
+process.env.CLIENT_ID;
+process.env.CLIENT_SECRET;
