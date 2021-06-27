@@ -1,44 +1,59 @@
 const { FetchFunction } = require("./fetchFunction");
 const { oAuth2TwoLegged } = require("./oAuth2TwoLegged");
-const { items } = require("./folderItems");
+
 const { flatten, delay } = require("./helper");
-const { itemsDetail } = require("./itemsDetail");
+
 require("dotenv").config({ path: "./.env" });
+
+const { derivativeGuid } = require("./derivative");
 
 async function translationProgress() {
   let allItemsProgress = [];
-  let allitems = [];
+  let itemNotSuccess = [];
   const credentials = await oAuth2TwoLegged();
-  const folderItem = await items();
-  const item = await itemsDetail();
-  allitems.push(item, folderItem);
-  const flatfolderItem = flatten(allitems);
+  const allItems = await derivativeGuid();
 
-  for (let i = 0; i < flatfolderItem.length; i++) {
-    const derivative = flatfolderItem[i];
+  for (let i = 0; i < allItems.length; i++) {
+    while (true) {
+      try {
+        await delay(10 * 1000);
+        const derivative = allItems[i];
 
-    const manifest = await FetchFunction(
-      `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`,
-      credentials.access_token
-    );
-    console.log("Translation Status:", manifest.derivatives);
-    allItemsProgress.push(manifest);
+        const manifest = await FetchFunction(
+          `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`,
+          credentials.access_token
+        );
+        console.log(manifest.progress);
+        if (manifest.progress === "complete") {
+          allItemsProgress.push({ manifest, itemDteails: derivative });
+          break;
+        }
+      } catch (error) {
+        console.log(error.message);
+      }
+    }
   }
-  const flatAllItemsProgress = flatten(allItemsProgress);
-
-  const allItemTranslatePros = flatAllItemsProgress.map((item) => {
-    return { progress: item.progress, status: item.status };
+  const allItemTranslatePros = allItemsProgress.map((item) => {
+    return {
+      ...item.itemDteails,
+      translateProgress: item.manifest.progress,
+      translateStatus: item.manifest.status,
+    };
   });
 
-  const check = allItemTranslatePros.every((item) => {
-    if (item.progress == "complete" && item.status == "success") {
+  //Check if all item translate status is complete
+  const checkItematranslateComplete = allItemTranslatePros.filter((item) => {
+    if (
+      item.translateProgress == "complete" &&
+      item.translateStatus != "failed"
+    ) {
       return true;
     } else {
       return false;
     }
   });
-
-  return check;
+  console.log(checkItematranslateComplete);
+  return checkItematranslateComplete;
 }
 
 module.exports = { translationProgress };

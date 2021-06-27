@@ -4,7 +4,7 @@ const app = express();
 const { items } = require("./folderItems");
 const { translationProgress } = require("./translationProgress");
 
-const { guid } = require("./tester");
+const { fetchProjectMetaData } = require("./fetchProjectMetaData");
 
 const { metadata } = require("./tester");
 const { derivativeGuid } = require("./derivative");
@@ -34,7 +34,8 @@ app.get("/derivativeGuid", async function (req, res) {
   res.send(guid);
 });
 app.get("/translationProgress", async function (req, res) {
-  const guid = await translationProgress();
+  // const guid = await translationProgress();
+  const guid = await fetchProjectMetaData();
   res.send(guid);
 });
 

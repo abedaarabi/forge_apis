@@ -13,8 +13,7 @@ async function projectDetails() {
     // "b.b85d407c-f4ed-41d1-b42a-2796292dbf0b",
     // "b.302c59a2-597e-4eea-9540-f4a83b6862d9",
     // "b.9a7ce2f5-2391-4bf5-8da6-aaacedaab911",
-    // "b.de596033-cef9-4736-a7b8-c6379ec88b2e",
-    // "b.12469613-6f90-42c3-b49c-4bb22e440e30",
+
     // "b.218d67d8-ac96-4d87-9ea6-80d380ac4d61",
     // "b.a9a41e9c-3a75-4fca-bb88-acd926c7bbdc",
     // "b.1f7a0c34-b82d-4ed0-b118-7d9c4a73ec80",

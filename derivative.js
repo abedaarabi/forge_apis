@@ -14,40 +14,39 @@ async function derivativeGuid() {
   allitems.push(item, folderItem);
   const flatfolderItem = flatten(allitems);
 
-  for (let i = 0; i < flatfolderItem.length; i++) {
-    const derivative = flatfolderItem[i];
+  try {
+    for (let i = 0; i < flatfolderItem.length; i++) {
+      const derivative = flatfolderItem[i];
 
-    const manifest = await FetchFunction(
-      `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`,
-      credentials.access_token
-    );
-    console.log("Translation Status:", manifest.derivatives);
-    const guidContents = await FetchFunction(
-      `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/metadata`,
-      credentials.access_token
-    );
+      const guidContents = await FetchFunction(
+        `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/metadata`,
+        credentials.access_token
+      );
 
-    const roles3d = guidContents.data.metadata.filter((item) => {
-      if (item.role === "3d" && item.name === "New Construction") {
-        return true;
-      }
+      const roles3d = guidContents.data.metadata.filter((item) => {
+        if (item.role === "3d" && item.name === "New Construction") {
+          return true;
+        }
+      });
+      console.log("Feting view name and guid", derivative.fileName);
+      guidSene.push({ roles3d, derivative });
+    }
+
+    const guids = guidSene.map((item) => {
+      return item.roles3d.map((guid) => {
+        return {
+          vieweName: guid.name,
+          role: guid.role,
+          guid: guid.guid,
+          ...item.derivative,
+        };
+      });
     });
-    console.log("Feting view name and guid", derivative.fileName);
-    guidSene.push({ roles3d, derivative });
+    const flatguidSene = flatten(guids);
+    return flatguidSene;
+  } catch (error) {
+    console.log(error.message);
   }
-
-  const guids = guidSene.map((item) => {
-    return item.roles3d.map((guid) => {
-      return {
-        vieweName: guid.name,
-        role: guid.role,
-        guid: guid.guid,
-        ...item.derivative,
-      };
-    });
-  });
-  const flatguidSene = flatten(guids);
-  return flatguidSene;
 }
 
 module.exports = { derivativeGuid };
