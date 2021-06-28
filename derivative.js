@@ -4,19 +4,17 @@ const { items } = require("./folderItems");
 const { flatten, delay } = require("./helper");
 const { itemsDetail } = require("./itemsDetail");
 require("dotenv").config({ path: "./.env" });
+const { translationProgress } = require("./translationProgress");
 
 async function derivativeGuid() {
   let guidSene = [];
-  let allitems = [];
+
   const credentials = await oAuth2TwoLegged();
-  const folderItem = await items();
-  const item = await itemsDetail();
-  allitems.push(item, folderItem);
-  const flatfolderItem = flatten(allitems);
+  const allItems = await translationProgress();
 
   try {
-    for (let i = 0; i < flatfolderItem.length; i++) {
-      const derivative = flatfolderItem[i];
+    for (let i = 0; i < allItems.length; i++) {
+      const derivative = allItems[i];
 
       const guidContents = await FetchFunction(
         `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/metadata`,
@@ -28,7 +26,7 @@ async function derivativeGuid() {
           return true;
         }
       });
-      console.log("Feting view name and guid", derivative.fileName);
+      console.log("fetching view name and guid", derivative.fileName);
       guidSene.push({ roles3d, derivative });
     }
 

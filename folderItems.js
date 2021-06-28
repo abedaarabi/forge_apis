@@ -25,7 +25,7 @@ async function items() {
       projectName: iItem.projectName,
     };
 
-    console.log("Fetching Folder", iItem.name);
+    console.log("Fetching folder items", iItem.name);
     array.push({ ...itemContent, folderDetail });
   }
 

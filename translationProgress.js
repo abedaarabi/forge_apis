@@ -4,27 +4,41 @@ const { oAuth2TwoLegged } = require("./oAuth2TwoLegged");
 const { flatten, delay } = require("./helper");
 
 require("dotenv").config({ path: "./.env" });
+const { items } = require("./folderItems");
 
-const { derivativeGuid } = require("./derivative");
+const { itemsDetail } = require("./itemsDetail");
 
 async function translationProgress() {
-  let allItemsProgress = [];
-  let itemNotSuccess = [];
   const credentials = await oAuth2TwoLegged();
-  const allItems = await derivativeGuid();
 
-  for (let i = 0; i < allItems.length; i++) {
+  let allItemsProgress = [];
+  let allitems = [];
+  const folderItem = await items();
+  const item = await itemsDetail();
+  allitems.push(item, folderItem);
+
+  const flatAllItems = flatten(allitems);
+
+  for (let i = 0; i < flatAllItems.length; i++) {
     while (true) {
       try {
-        await delay(10 * 1000);
-        const derivative = allItems[i];
+        const derivative = flatAllItems[i];
 
+        // await delay(5 * 1000);
         const manifest = await FetchFunction(
           `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`,
           credentials.access_token
         );
-        console.log(manifest.progress);
-        if (manifest.progress === "complete") {
+
+        if (manifest.progress != "complete") {
+          await delay(5 * 1000);
+          console.log(
+            "waitin for translation to finish: ",
+            derivative.fileName
+          );
+          continue;
+        } else if (manifest.progress === "complete") {
+          console.log("Translate progress complete: ", derivative.fileName);
           allItemsProgress.push({ manifest, itemDteails: derivative });
           break;
         }
@@ -33,6 +47,7 @@ async function translationProgress() {
       }
     }
   }
+
   const allItemTranslatePros = allItemsProgress.map((item) => {
     return {
       ...item.itemDteails,
@@ -52,7 +67,7 @@ async function translationProgress() {
       return false;
     }
   });
-  console.log(checkItematranslateComplete);
+  // console.log(checkItematranslateComplete);
   return checkItematranslateComplete;
 }
 

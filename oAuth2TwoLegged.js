@@ -11,6 +11,3 @@ function oAuth2TwoLegged() {
 }
 
 module.exports = { oAuth2TwoLegged };
-
-process.env.CLIENT_ID;
-process.env.CLIENT_SECRET;
