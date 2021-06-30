@@ -31,7 +31,7 @@ async function fetchProjectMetaData() {
             ` Status:${response.status} Preparing json data for model`,
             items.fileName
           );
-          await delay(10 * 1000);
+          await delay(2 * 1000);
           continue;
         } else {
           console.log(
@@ -39,6 +39,7 @@ async function fetchProjectMetaData() {
             items.fileName
           );
           projectData.push({ metaData, itemDteails: items });
+          // await delay(15 * 1000);
           break;
         }
       } catch (error) {
@@ -46,7 +47,8 @@ async function fetchProjectMetaData() {
       }
     }
   }
-  return projectData[0];
+
+  return projectData;
 }
 
 module.exports = { fetchProjectMetaData };

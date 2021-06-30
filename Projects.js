@@ -16,6 +16,4 @@ async function projects() {
   return projects.data;
 }
 
-projects();
-
 module.exports = { projects };

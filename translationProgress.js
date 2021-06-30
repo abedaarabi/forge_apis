@@ -19,10 +19,24 @@ async function translationProgress() {
 
   const flatAllItems = flatten(allitems);
 
-  for (let i = 0; i < flatAllItems.length; i++) {
+  // return only K07 K08 K09
+  const kItems = flatAllItems.filter((item) => {
+    if (
+      item.fileName.includes("K07") ||
+      item.fileName.includes("K08") ||
+      item.fileName.includes("K09")
+    ) {
+      return true;
+    } else return false;
+  });
+
+  // Remove IFC from UN17_K09_F2_KON_VOID.ifc.RVT <Example>
+  const removeIFC = kItems.filter((item) => item.originalItemUrn);
+
+  for (let i = 0; i < removeIFC.length; i++) {
     while (true) {
       try {
-        const derivative = flatAllItems[i];
+        const derivative = removeIFC[i];
 
         // await delay(5 * 1000);
         const manifest = await FetchFunction(
