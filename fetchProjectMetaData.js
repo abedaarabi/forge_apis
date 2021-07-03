@@ -3,6 +3,9 @@ const { flatten, delay } = require("./helper");
 const { derivativeGuid } = require("./derivative");
 const fetch = require("node-fetch");
 require("dotenv").config({ path: "./.env" });
+const fs = require("fs");
+const result = fs.readFileSync(__dirname + "/token.txt");
+const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function fetchProjectMetaData() {
   let projectData = [];
@@ -17,7 +20,7 @@ async function fetchProjectMetaData() {
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${credentials.access_token}`,
+              Authorization: `Bearer ${TOKEN}`,
               "Content-Type": "application/x-www-form-urlencoded",
             },
           }
@@ -31,7 +34,7 @@ async function fetchProjectMetaData() {
             ` Status:${response.status} Preparing json data for model`,
             items.fileName
           );
-          await delay(2 * 1000);
+          await delay(5 * 1000);
           continue;
         } else {
           console.log(

@@ -1,8 +1,9 @@
 const express = require("express");
 const app = express();
 const cron = require("node-cron");
-
+const fs = require("fs");
 const { items } = require("./folderItems");
+const { getStoredToken } = require("./three_Legged_Auth");
 const { translationProgress } = require("./translationProgress");
 const { downloadItem } = require("./downlodItem");
 
@@ -47,23 +48,35 @@ app.get("/publishModel", async function (req, res) {
   res.send(guid);
 });
 app.get("/downloadItem", async function (req, res) {
-  // const guid = await translationProgress();
-  const item = await downloadItem();
-  res.send(item);
+  const guid = await translationProgress();
+  // const item = await downloadItem();
+  res.send(guid);
 });
 
-// var task = cron
-//   .schedule(
-//     "1 * * * * *",
-//     async () => {
-//       console.log("Printing this line every minute in the terminal");
-//       await revitData();
-//     },
-//     {
-//       scheduled: true,
-//     }
-//   )
-//   .start();
+var accessToken = cron.schedule(
+  "*/15 * * * *",
+  async () => {
+    console.log("Printing this line every minute in the terminal");
+    await getStoredToken();
+    // await revitData();
+  },
+  {
+    scheduled: true,
+  }
+);
+accessToken.start();
+var data = cron.schedule(
+  "0 */2 * * *",
+  async () => {
+    console.log("Printing revitData");
+
+    await revitData();
+  },
+  {
+    scheduled: true,
+  }
+);
+data.start();
 
 const stratServer = async () => {
   app.listen(3002, console.log(`server is running on ${3002} ` || 8080));
@@ -72,6 +85,6 @@ const stratServer = async () => {
 (async () => {
   await stratServer();
   console.log("**** Script Start ****");
-  // await revitData();
+
   console.log("**** Script End :) ****");
 })();

@@ -5,6 +5,9 @@ const { flatten, delay } = require("./helper");
 const { itemsDetail } = require("./itemsDetail");
 require("dotenv").config({ path: "./.env" });
 const { translationProgress } = require("./translationProgress");
+const fs = require("fs");
+const result = fs.readFileSync(__dirname + "/token.txt");
+const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function derivativeGuid() {
   let guidSene = [];
@@ -18,7 +21,7 @@ async function derivativeGuid() {
 
       const guidContents = await FetchFunction(
         `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/metadata`,
-        credentials.access_token
+        TOKEN
       );
 
       const roles3d = guidContents.data.metadata.filter((item) => {

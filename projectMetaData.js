@@ -39,8 +39,12 @@ async function revitData() {
       element,
     };
   });
-  console.log(properties.length);
 
-  return "properties[5]";
+  var today = new Date();
+  var time =
+    today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  console.log("++++++++++++++++++++++++++++++++",time);
+
+  return "properties[5]" + time;
 }
 module.exports = { revitData };

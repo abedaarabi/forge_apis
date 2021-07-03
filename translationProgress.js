@@ -7,6 +7,9 @@ require("dotenv").config({ path: "./.env" });
 const { items } = require("./folderItems");
 
 const { itemsDetail } = require("./itemsDetail");
+const fs = require("fs");
+const result = fs.readFileSync(__dirname + "/token.txt");
+const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function translationProgress() {
   const credentials = await oAuth2TwoLegged();
@@ -41,11 +44,12 @@ async function translationProgress() {
         // await delay(5 * 1000);
         const manifest = await FetchFunction(
           `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`,
-          credentials.access_token
+          TOKEN
         );
 
+        // return manifest;
         if (manifest.progress != "complete") {
-          await delay(5 * 1000);
+          await delay(10 * 1000);
           console.log(
             "waitin for translation to finish: ",
             derivative.fileName

@@ -3,17 +3,12 @@ const ForgeSDK = require("forge-apis");
 
 require("dotenv").config({ path: "./.env" });
 
-function oAuth2TwoLegged() {
-  return new ForgeSDK.AuthClientTwoLegged(
-    process.env.CLIENT_ID,
-    process.env.CLIENT_SECRET,
-    ["data:create", "data:read"],
-    true
-  ).authenticate();
-}
+const fs = require("fs");
+const result = fs.readFileSync(__dirname + "/token.txt");
+const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function publishModel() {
-  const credentials = await oAuth2TwoLegged();
+  // const credentials = await oAuth2TwoLegged();
   const urnId = "urn:adsk.wipprod:dm.lineage:mF7-c5plRv6MunMkeSOt-Q";
 
   const url = `https://developer.api.autodesk.com/data/v1/projects/b.79a6bff3-34b1-435f-8964-282f78ae1ef5/commands`;
@@ -22,8 +17,8 @@ async function publishModel() {
     url,
     headers: {
       "content-type": "application/vnd.api+json",
-      Authorization: `Bearer ${credentials.access_token}`,
-      "x-user-id": "e8e4e102-13d1-493d-b448-4b14365ecb89",
+      Authorization: `Bearer ${TOKEN}`,
+      // "x-user-id": "e8e4e102-13d1-493d-b448-4b14365ecb89",
     },
     data: JSON.stringify({
       jsonapi: {
@@ -50,8 +45,38 @@ async function publishModel() {
       },
     }),
   });
-  console.log(response);
-  return response;
+  console.log(response.data);
+  return response.data;
 }
 
 module.exports = { publishModel };
+
+// Documentation🧮
+
+/****
+ * 
+ * 
+ * to check  type: "commands:autodesk.bim360:C4RModelGetPublishJob",
+ f you have published the latest version, the status attribute is set to processing or complete
+ * {
+  jsonapi: { version: '1.0' },
+  data: {
+    type: 'commands',
+    id: '793ee840-f421-4bb9-8670-9015017e0290',
+    attributes: { status: 'complete', extension: [Object] }     
+  }
+}
+ "type": "commands:autodesk.bim360:C4RModelPublish",
+if  "data": null
+If you have updated the central model, the data attribute is set to null until you publish it.
+
+{
+  "jsonapi": {
+    "version": "1.0"
+  },
+  "data": null
+}
+ * 
+ * 
+ * 
+ * *****/
