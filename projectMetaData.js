@@ -43,8 +43,8 @@ async function revitData() {
   var today = new Date();
   var time =
     today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-  console.log("++++++++++++++++++++++++++++++++",time);
+  console.log(properties);
 
-  return "properties[5]" + time;
+  return properties;
 }
 module.exports = { revitData };

@@ -7,9 +7,6 @@ require("dotenv").config({ path: "./.env" });
 const { items } = require("./folderItems");
 
 const { itemsDetail } = require("./itemsDetail");
-const fs = require("fs");
-const result = fs.readFileSync(__dirname + "/token.txt");
-const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function translationProgress() {
   const credentials = await oAuth2TwoLegged();
@@ -43,8 +40,7 @@ async function translationProgress() {
 
         // await delay(5 * 1000);
         const manifest = await FetchFunction(
-          `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`,
-          TOKEN
+          `${process.env.API_ENDPOINT}modelderivative/v2/designdata/${derivative.derivativesId}/manifest`
         );
 
         // return manifest;

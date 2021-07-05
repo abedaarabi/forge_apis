@@ -4,9 +4,6 @@ const { oAuth2TwoLegged } = require("./oAuth2TwoLegged");
 const { Hub } = require("./Hub");
 
 require("dotenv").config({ path: "./.env" });
-const fs = require("fs");
-const result = fs.readFileSync(__dirname + "/token.txt");
-const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function topFolders() {
   const credentials = await oAuth2TwoLegged();
@@ -16,8 +13,7 @@ async function topFolders() {
     projectIds
       .map(async (topFoldersDetaile) => {
         const folderDetaile = await FetchFunction(
-          `${process.env.API_ENDPOINT}project/v1/hubs/${hubId}/projects/${topFoldersDetaile.projectId}/topFolders`,
-          TOKEN
+          `${process.env.API_ENDPOINT}project/v1/hubs/${hubId}/projects/${topFoldersDetaile.projectId}/topFolders`
         );
         return { folderDetaile, topFoldersDetaile };
       })
@@ -69,8 +65,7 @@ async function folders() {
       );
 
       const folderContents = await FetchFunction(
-        `${process.env.API_ENDPOINT}data/v1/projects/${folderDetail.projectId}/folders/${folderDetail.urnFolder}/contents`,
-        TOKEN
+        `${process.env.API_ENDPOINT}data/v1/projects/${folderDetail.projectId}/folders/${folderDetail.urnFolder}/contents`
       );
       folder.push({ ...folderContents, folderDetail });
     }

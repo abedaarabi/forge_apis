@@ -48,35 +48,35 @@ app.get("/publishModel", async function (req, res) {
   res.send(guid);
 });
 app.get("/downloadItem", async function (req, res) {
-  const guid = await translationProgress();
-  // const item = await downloadItem();
-  res.send(guid);
+  // const guid = await translationProgress();
+  const item = await downloadItem();
+  res.send(item);
 });
 
-var accessToken = cron.schedule(
-  "*/15 * * * *",
-  async () => {
-    console.log("Printing this line every minute in the terminal");
-    await getStoredToken();
-    // await revitData();
-  },
-  {
-    scheduled: true,
-  }
-);
-accessToken.start();
-var data = cron.schedule(
-  "0 */2 * * *",
-  async () => {
-    console.log("Printing revitData");
+// var accessToken = cron.schedule(
+//   "*/15 * * * *",
+//   async () => {
+//     console.log("Printing this line every minute in the terminal");
+//     await getStoredToken();
+//     // await revitData();
+//   },
+//   {
+//     scheduled: true,
+//   }
+// );
+// accessToken.start();
+// var data = cron.schedule(
+//   "*/5 * * * *",
+//   async () => {
+//     console.log("Printing revitData");
 
-    await revitData();
-  },
-  {
-    scheduled: true,
-  }
-);
-data.start();
+//     await revitData();
+//   },
+//   {
+//     scheduled: true,
+//   }
+// );
+// data.start();
 
 const stratServer = async () => {
   app.listen(3002, console.log(`server is running on ${3002} ` || 8080));

@@ -32,6 +32,9 @@ function getItemVersionHelper(folder, folderItems) {
 
   const itemAndVersionIfo = revitFilesIncluded.map((allItems) => {
     const allIncludes = allItems.allIncluded.map((incloude) => {
+      const downloadItems =
+        incloude.relationships.storage.meta.link.href.split("?")[0];
+
       return {
         versionId: incloude.id,
         versionType: incloude.type,
@@ -46,6 +49,7 @@ function getItemVersionHelper(folder, folderItems) {
         extension: incloude.attributes.extension.type,
         originalItemUrn: incloude.attributes.extension.data.originalItemUrn,
         projectGuid: incloude.attributes.extension.data.projectGuid,
+        downloadItem: downloadItems,
         ...allItems.folderDetail,
       };
     });
@@ -56,7 +60,7 @@ function getItemVersionHelper(folder, folderItems) {
   return flatItemAndVersionIfo;
 }
 
-// Get all foders details in order to fetch their items
+// Get all folders details in order to fetch its items
 function folderInfoHelper(folder, folderItems) {
   const foldersAttributes = folder
     .filter((item) => item.data)

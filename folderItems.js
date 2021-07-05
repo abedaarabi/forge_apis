@@ -4,9 +4,6 @@ const { folderDetails } = require("./folderDetails");
 const { getItemVersionHelper, delay } = require("./helper");
 
 require("dotenv").config({ path: "./.env" });
-const fs = require("fs");
-const result = fs.readFileSync(__dirname + "/token.txt");
-const TOKEN = JSON.parse(result.toString()).access_token;
 
 // Get all the items that located inside the folder
 async function items() {
@@ -18,9 +15,7 @@ async function items() {
   for (let i = 0; i < folders.length; i++) {
     const iItem = folders[i];
     const itemContent = await FetchFunction(
-      `${process.env.API_ENDPOINT}data/v1/projects/${iItem.projectId}/folders/${iItem.folderId}/contents`,
-
-      TOKEN
+      `${process.env.API_ENDPOINT}data/v1/projects/${iItem.projectId}/folders/${iItem.folderId}/contents`
     );
     const folderDetail = {
       urnFolder: iItem.urnFolder,

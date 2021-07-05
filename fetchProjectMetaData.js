@@ -3,14 +3,12 @@ const { flatten, delay } = require("./helper");
 const { derivativeGuid } = require("./derivative");
 const fetch = require("node-fetch");
 require("dotenv").config({ path: "./.env" });
-const fs = require("fs");
-const result = fs.readFileSync(__dirname + "/token.txt");
-const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function fetchProjectMetaData() {
+  const TOKEN = await oAuth2TwoLegged();
   let projectData = [];
   const itemsDetails = await derivativeGuid();
-  const credentials = await oAuth2TwoLegged();
+
   for (let i = 0; i < itemsDetails.length; i++) {
     while (true) {
       const items = itemsDetails[i];
@@ -20,7 +18,7 @@ async function fetchProjectMetaData() {
           {
             method: "GET",
             headers: {
-              Authorization: `Bearer ${TOKEN}`,
+              Authorization: `Bearer ${TOKEN.access_token}`,
               "Content-Type": "application/x-www-form-urlencoded",
             },
           }

@@ -4,27 +4,71 @@ const { FetchFunction } = require("./fetchFunction");
 const axios = require("axios");
 const querystring = require("querystring");
 var fs = require("fs");
-const result = fs.readFileSync(__dirname + "/token.txt");
-const TOKEN = JSON.parse(result.toString()).access_token;
-async function downloadItem() {
-  var writeStream = fs.createWriteStream("./downloads/abrd.ifc");
+const { flatten, delay } = require("./helper");
+const { items } = require("./folderItems");
 
-  const credentials = await auth();
-  const url =
-    "https://developer.api.autodesk.com/modelderivative/v2/designdata/dXJuOmFkc2sud2lwcHJvZDpmcy5maWxlOnZmLk0wbDJyV3BmUW1HUTZQdGYweVRQeFE_dmVyc2lvbj0z/manifest/urn:adsk.viewing:fs.file:dXJuOmFkc2sud2lwcHJvZDpmcy5maWxlOnZmLk0wbDJyV3BmUW1HUTZQdGYweVRQeFE_dmVyc2lvbj0z/output/Resource/IFC/LLYN_B310_K09_F02_N01_detached.ifc";
-  const response = await axios({
-    url,
-    responseType: "stream",
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
+const { itemsDetail } = require("./itemsDetail");
+const { projectDetails } = require("./projectDetails");
+async function downloadItem() {
+  //Create Folder for each project
+  const projectsFolder = await projectDetails();
+  projectsFolder.forEach((folder) => {
+    fs.mkdir(
+      `//Kbh-data02/kbh_data_1/2300-/3000/3000-150/BD BIM/ABMA/BIM360 Backup/${folder.projectName}`,
+      () => {
+        console.log("done", folder.projectName);
+      }
+    );
   });
-  response.data.pipe(writeStream);
-  writeStream.on("error", function (err) {
-    console.log(err);
+  // download all project items inside its folder
+  let allitems = [];
+  const folderItem = await items();
+  const item = await itemsDetail();
+  allitems.push(item, folderItem);
+
+  const flatAllItems = flatten(allitems);
+
+  // return only K07 K08 K09
+  const kItems = flatAllItems.filter((item) => {
+    if (
+      item.fileName.includes("K07") ||
+      item.fileName.includes("K08") ||
+      item.fileName.includes("K10")
+    ) {
+      return true;
+    } else return false;
   });
-  // console.log(response.data);
-  // return JSON.stringify("response.data");
+
+  // Remove IFC from UN17_K09_F2_KON_VOID.ifc.RVT <Example>
+  const removeIFC = kItems.filter((item) => item.originalItemUrn);
+
+  for (let i = 0; i < kItems.length; i++) {
+    const items = kItems[i];
+
+    try {
+      const writeStream = fs.createWriteStream(
+        `//Kbh-data02/kbh_data_1/2300-/3000/3000-150/BD BIM/ABMA/BIM360 Backup/${items.projectName}/${items.fileName}`
+      );
+
+      const TOKEN = await oAuth2TwoLegged();
+
+      const url = `${items.downloadItem}`;
+      const response = await axios({
+        url,
+        responseType: "stream",
+        headers: {
+          Authorization: `Bearer ${TOKEN.access_token}`,
+        },
+      });
+      await response.data.pipe(writeStream);
+      console.log("Downloading...", items.fileName);
+      writeStream.on("error", function (err) {
+        console.log(err);
+      });
+      // console.log(response.data);
+    } catch (error) {}
+  }
+  console.log("Done");
 }
 
 module.exports = { downloadItem };
