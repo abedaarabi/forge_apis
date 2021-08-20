@@ -15,7 +15,7 @@ async function downloadItem() {
   //Create Folder for each project
   const projectsFolder = await projectDetails();
   projectsFolder.forEach((folder) => {
-    fs.mkdir(`./test/${folder.projectName}`, () => {
+    fs.mkdir(`I:/BIM360-BackUp/${folder.projectName}`, () => {
       console.log("done", folder.projectName);
     });
   });
@@ -49,7 +49,7 @@ async function downloadItem() {
     const items = kItems[i];
     try {
       const writeStream = fs.createWriteStream(
-        `./test/${items.projectName}/${items.fileName}`
+        `I:/BIM360-BackUp/${items.projectName}/${items.fileName}`
       );
 
       const TOKEN = await oAuth2TwoLegged();
