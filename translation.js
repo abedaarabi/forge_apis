@@ -1,6 +1,6 @@
 const axios = require("axios");
 const ForgeSDK = require("forge-apis");
-
+const { oAuth2TwoLegged } = require("./oAuth2TwoLegged");
 require("dotenv").config({ path: "./.env" });
 
 const fs = require("fs");
@@ -8,8 +8,8 @@ const result = fs.readFileSync(__dirname + "/token.txt");
 const TOKEN = JSON.parse(result.toString()).access_token;
 
 async function publishModel() {
-  // const credentials = await oAuth2TwoLegged();
-  const urnId = "urn:adsk.wipprod:dm.lineage:mF7-c5plRv6MunMkeSOt-Q";
+  const credentials = await oAuth2TwoLegged();
+  const urnId = "urn:adsk.wipprod:dm.lineage:jgVScQVsQqOXZhHGGqazEw";
 
   const url = `https://developer.api.autodesk.com/data/v1/projects/b.79a6bff3-34b1-435f-8964-282f78ae1ef5/commands`;
   const response = await axios({
@@ -17,8 +17,8 @@ async function publishModel() {
     url,
     headers: {
       "content-type": "application/vnd.api+json",
-      Authorization: `Bearer ${TOKEN}`,
-      // "x-user-id": "e8e4e102-13d1-493d-b448-4b14365ecb89",
+      Authorization: `Bearer ${credentials.access_token}`,
+      "x-user-id": "G37HRH22DWBV",
     },
     data: JSON.stringify({
       jsonapi: {
@@ -36,8 +36,8 @@ async function publishModel() {
           resources: {
             data: [
               {
-                type: "items",
                 id: urnId,
+                type: "items",
               },
             ],
           },
@@ -51,9 +51,14 @@ async function publishModel() {
 
 module.exports = { publishModel };
 
-// Documentation🧮
+//200703030286415 Jesper
+//4RL5NPRJ3LNM bimadmin
+//G37HRH22DWBV Abed
+//A4CZNLQVA864 Anita
 
+// Documentation🧮
 /****
+//  *https://forge.autodesk.com/en/docs/data/v2/tutorials/publish-model/
  * 
  * 
  * to check  type: "commands:autodesk.bim360:C4RModelGetPublishJob",

@@ -6,7 +6,7 @@ const { items } = require("./folderItems");
 const { getStoredToken } = require("./three_Legged_Auth");
 const { translationProgress } = require("./translationProgress");
 const { downloadItem } = require("./downlodItem");
-
+const { topFolders } = require("./topFolders");
 const { revitData } = require("./projectMetaData");
 
 const { metadata } = require("./tester");
@@ -48,9 +48,9 @@ app.get("/publishModel", async function (req, res) {
   res.send(guid);
 });
 app.get("/downloadItem", async function (req, res) {
-  // const guid = await translationProgress();
-  const item = await downloadItem();
-  res.send(item);
+  const guid = await downloadItem();
+  // const item = await topFolders();
+  res.send(guid);
 });
 
 // var accessToken = cron.schedule(

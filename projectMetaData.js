@@ -25,6 +25,7 @@ async function revitData() {
         dbId: Number(dbId),
         externalId: elt["externalId"],
         typName: elt.properties["Identity Data"]["Type Name"],
+
         versionId: property.itemDteails.versionId,
       };
     });
